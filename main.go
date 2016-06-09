@@ -24,10 +24,9 @@ func main() {
 	fmt.Println("Staring balance: $", balance)
 
 	wg.Add(1)
-
 	for i := 0; i < 100; i++ {
-		go func(ii int) {
 
+		go func(ii int) {
 			transactionAmount := rand.Intn(25)
 			balanceChan <- transactionAmount
 
@@ -39,7 +38,7 @@ func main() {
 			}
 		}(i)
 	}
-	go transaction(0)
+	// go transaction(0)
 
 	breakPoint := false
 
@@ -56,7 +55,9 @@ func main() {
 			if (balance - amt) < 0 {
 				fmt.Println("Transaction failed!")
 			} else {
+				mutx.Lock()
 				balance = balance - amt
+				mutx.Unlock()
 				fmt.Println("Transaction succeeded")
 			}
 			fmt.Println("Balance now $", balance)
@@ -79,15 +80,18 @@ func main() {
 } // end of main
 
 func transaction(amt int) bool {
-	mutx.Lock()
+	// mutx.Lock()
 
 	approved := false
 	if (balance - amt) < 0 {
 		approved = false
 	} else {
 		approved = true
+		// mutx.Lock()
 		balance = balance - amt
+		// mutx.Unlock()
 	}
+
 	approvedText := "declined"
 	if approved == true {
 		approvedText = "approved"
@@ -98,6 +102,6 @@ func transaction(amt int) bool {
 	fmt.Println(transactionNo, "Transaction for $", amt, approvedText)
 	fmt.Println("\tRemaining balance $", balance)
 
-	mutx.Unlock()
+	// mutx.Unlock()
 	return approved
 }
